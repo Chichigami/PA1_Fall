@@ -29,6 +29,7 @@ class DataEntryStore[A >: Null <: AnyRef](private val capacity: Int = 100)
   /** Inserts element to tail of list. */
   def insert(elem: A): Unit = {
     var previousNode = 0
+    var wrapped: Boolean = false
     if (numStored == 0){
       headIndex = 0
       tailIndex = 0
@@ -41,16 +42,17 @@ class DataEntryStore[A >: Null <: AnyRef](private val capacity: Int = 100)
       dataArray(previousNode).next = tailIndex
       if (dataArray.length == capacity){
         headIndex += 1
-        dataArray(headIndex).prev = -1
         previousNode = tailIndex
-        if (tailIndex == 0){
-          tailIndex += 1
-        } else {
+        if (!wrapped){
+          wrapped = true
           tailIndex = 0
+        } else {
+          tailIndex += 1
         }
         dataArray(tailIndex).value = elem
         dataArray(tailIndex).prev = previousNode
         dataArray(previousNode).next = tailIndex
+        dataArray(headIndex).prev = -1
         numStored -= 1
       }
     }
