@@ -25,47 +25,52 @@ class DataEntryStore[A >: Null <: AnyRef](private val capacity: Int = 100)
   private var headIndex = -1
   private var tailIndex = -1
   private var numStored = 0
+  var wrapped: Boolean = false
 
   /** Inserts element to tail of list. */
   def insert(elem: A): Unit = {
     var previousNode = 0
-    var wrapped: Boolean = false
-    if (numStored == 0){
+    if (numStored == 0) {
       headIndex = 0
       tailIndex = 0
       dataArray(tailIndex).value = elem
-    } else {
+    } else if (numStored == capacity) { //wrapping
+      previousNode = tailIndex
+      tailIndex = headIndex
+      headIndex += 1
+      dataArray(tailIndex).value = elem
+      dataArray(tailIndex).prev = previousNode
+      dataArray(tailIndex).next = -1
+      dataArray(previousNode).next = tailIndex
+      dataArray(headIndex).prev = -1
+      numStored -= 1
+    } else { // normal insert
       previousNode = tailIndex
       tailIndex += 1
       dataArray(tailIndex).value = elem
       dataArray(tailIndex).prev = previousNode
       dataArray(previousNode).next = tailIndex
-      if (dataArray.length == capacity){
-        headIndex += 1
-        previousNode = tailIndex
-        if (!wrapped){
-          wrapped = true
-          tailIndex = 0
-        } else {
-          tailIndex += 1
-        }
-        dataArray(tailIndex).value = elem
-        dataArray(tailIndex).prev = previousNode
-        dataArray(previousNode).next = tailIndex
-        dataArray(headIndex).prev = -1
-        numStored -= 1
-      }
     }
     numStored += 1
   }
 
   /** Removes all copies of the given element. */
   def remove(elem: A): Boolean = {
+    var positionPrev = 0
+    var positionNext = 0
     var doesElemExist = false
     for (i <- dataArray.iterator){
       if (i.value == elem){
         doesElemExist = true
-        i.value = null
+        positionPrev = i.prev //setting left and right node of cleaned to each other
+        positionNext = i.next
+        if (positionPrev != -1){
+          dataArray(positionPrev).next = positionNext
+        }
+        if (positionNext != -1){
+          dataArray(positionNext).prev = positionPrev
+        }
+        i.value = null //cleaning node
         i.prev = -1
         i.next = -1
         numStored -= 1
