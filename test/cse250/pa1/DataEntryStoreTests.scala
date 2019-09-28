@@ -183,7 +183,6 @@ class DataEntryStoreTests extends FlatSpec with BeforeAndAfter {
     assert(dataStore.length == 0)
     assert(!dataStore.iterator.hasNext)
   }
-
   it should "work" in {<!-- -->
     val testSize = 10
     var dataArray = new DataEntryStore[String](testSize)
@@ -206,7 +205,6 @@ class DataEntryStoreTests extends FlatSpec with BeforeAndAfter {
     for(i<- 0 until testSize/2) assert(iterator.next == (testSize/2+ i).toString)
     for(i<- 0 until testSize/2) assert(dataArray(i) == (testSize/2+ i).toString)
   }
-
   it should "work in a removal case" in {
     val testSize = 3
     var iter: Iterator[String] = null

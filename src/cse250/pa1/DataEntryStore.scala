@@ -34,10 +34,12 @@ class DataEntryStore[A >: Null <: AnyRef](private val capacity: Int = 100)
       headIndex = 0
       tailIndex = 0
       dataArray(tailIndex).value = elem
-    } else if (numStored == capacity) { //wrapping
+      println(tailIndex + ":" + elem)
+    } else if (numStored == capacity) { //wrapping around
       previousNode = tailIndex
       tailIndex = headIndex
       headIndex += 1
+      println(tailIndex + ":" + elem)
       dataArray(tailIndex).value = elem
       dataArray(tailIndex).prev = previousNode
       dataArray(tailIndex).next = -1
@@ -50,26 +52,26 @@ class DataEntryStore[A >: Null <: AnyRef](private val capacity: Int = 100)
       dataArray(tailIndex).value = elem
       dataArray(tailIndex).prev = previousNode
       dataArray(previousNode).next = tailIndex
+      println(tailIndex + ":" + elem)
     }
     numStored += 1
   }
 
   /** Removes all copies of the given element. */
   def remove(elem: A): Boolean = {
-    var positionPrev = 0
-    var positionNext = 0
     var doesElemExist = false
-    for (i <- dataArray.iterator){
+    val iter = dataArray.iterator
+    for (i <- iter){
       if (i.value == elem){
         doesElemExist = true
-        positionPrev = i.prev //setting left and right node of cleaned to each other
-        positionNext = i.next
-        if (positionPrev != -1){
-          dataArray(positionPrev).next = positionNext
+        if (i.prev != -1){
+          dataArray(i.prev).next = i.next
         }
-        if (positionNext != -1){
-          dataArray(positionNext).prev = positionPrev
+        if (i.next != -1){
+          dataArray(i.next).prev = i.prev
         }
+
+        //need to change tail
         i.value = null //cleaning node
         i.prev = -1
         i.next = -1
