@@ -1,7 +1,7 @@
 /**
- * DataEntryStore.scala
+ * cse250.pa1.DataEntryStore.scala
  *
- * Copyright 2019 Andrew Hughes (ahughes6@buffalo.edu)
+ * Copyright 2020 Andrew Hughes (ahughes6@buffalo.edu)
  *
  * This work is licensed under the Creative Commons
  * Attribution-NonCommercial-ShareAlike 4.0 International License.
@@ -9,114 +9,61 @@
  * http://creativecommons.org/licenses/by-nc-sa/4.0/.
  *
  * Submission author
- * UBIT: garyfeng
- * Person#: 50242102
+ * UBIT:
+ * Person#:
  *
  * Collaborators (include UBIT name of each, comma separated):
  * UBIT:
  */
 package cse250.pa1
 
-import cse250.objects.EmbeddedListNode
+import cse250.objects.{EmbeddedNode, EmbeddedEmpty, EmbeddedListNode}
 
-class DataEntryStore[A >: Null <: AnyRef](private val capacity: Int = 100)
+class DataEntryStore[A](private val _capacity: Int = 100)
   extends collection.mutable.Seq[A] {
-  private val dataArray = Array.fill[EmbeddedListNode[A]](capacity)(new EmbeddedListNode[A])
-  private var headIndex = -1
-  private var tailIndex = -1
-  private var numStored = 0
-  var wrapped: Boolean = false
+  // These private members should not be modified.
+  private val _emptyNode = new EmbeddedEmpty[A]
+  private val _dataArray = Array.fill[EmbeddedListNode[A]](_capacity)(_emptyNode)
+  private var _headIndex = -1
+  private var _tailIndex = -1
+  private var _numStored = 0
+
+  // Public getters for private members.
+  def dataArray = _dataArray
+  def headIndex = _headIndex
+  def tailIndex = _tailIndex
+  def emptyNode = _emptyNode
 
   /** Inserts element to tail of list. */
-  def insert(elem: A): Unit = {
-    var previousNode = 0
-    if (numStored == 0) {
-      headIndex = 0
-      tailIndex = 0
-      dataArray(tailIndex).value = elem
-      println(tailIndex + ":" + elem)
-    } else if (numStored == capacity) { //wrapping around
-      previousNode = tailIndex
-      tailIndex = headIndex
-      headIndex += 1
-      println(tailIndex + ":" + elem)
-      dataArray(tailIndex).value = elem
-      dataArray(tailIndex).prev = previousNode
-      dataArray(tailIndex).next = -1
-      dataArray(previousNode).next = tailIndex
-      dataArray(headIndex).prev = -1
-      numStored -= 1
-    } else { // normal insert
-      previousNode = tailIndex
-      tailIndex += 1
-      dataArray(tailIndex).value = elem
-      dataArray(tailIndex).prev = previousNode
-      dataArray(previousNode).next = tailIndex
-      println(tailIndex + ":" + elem)
-    }
-    numStored += 1
-  }
+  def insert(elem: A): Unit = ???
 
   /** Removes all copies of the given element. */
-  def remove(elem: A): Boolean = {
-    var doesElemExist = false
-    val iter = dataArray.iterator
-    for (i <- iter){
-      if (i.value == elem){
-        doesElemExist = true
-        if (i.prev != -1){
-          dataArray(i.prev).next = i.next
-        }
-        if (i.next != -1){
-          dataArray(i.next).prev = i.prev
-        }
-
-        //need to change tail
-        i.value = null //cleaning node
-        i.prev = -1
-        i.next = -1
-        numStored -= 1
-      }
-    }
-    doesElemExist
-  }
+  def remove(elem: A): Boolean = ???
 
   /** Returns the count of nodes containing given entry. */
-  def countEntry(entry: A): Int = {
-    var sum = 0
-    for (i <- dataArray.iterator){
-      if (i.value == entry){
-       sum += 1
-      }
-    }
-    sum
-  }
+  def countEntry(entry: A): Int = ???
 
   /** Gets the element at the specified index. */
-  override def apply(idx: Int): A = {
-    dataArray(idx).value
-  }
+  override def apply(idx: Int): A = ???
 
   /** Replaces element at given index with a new value. */
-  override def update(idx: Int, elem: A): Unit = {
-    dataArray(idx).value = elem
-  }
+  override def update(idx: Int, elem: A): Unit = ???
 
   /** Returns an Iterator that can be used only once. */
   def iterator: Iterator[A] = new Iterator[A] {
-    private var current = headIndex
+    private var currentIndex = _headIndex
 
-    override def hasNext: Boolean = current != -1
+    override def hasNext: Boolean = currentIndex != -1
 
     override def next(): A = {
-      val prev = current
-      current = dataArray(current).next
-      dataArray(prev).value
+      val previousIndex = currentIndex
+      currentIndex = _dataArray(currentIndex).next
+      _dataArray(previousIndex).value.get
     }
   }
 
   /** Returns the length of the stored list. */
-  override def length: Int = numStored
+  override def length: Int = _numStored
 
-  override def toString: String = if (numStored == 0) "" else this.iterator.addString(new StringBuilder, "\n").result()
+  override def toString: String = if (_numStored == 0) "" else this.iterator.addString(new StringBuilder, "DataEntryStore: (", ",", ")\n").result()
 }
