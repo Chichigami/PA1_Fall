@@ -41,13 +41,25 @@ class DataEntryStore[A](private val _capacity: Int = 100)
   def remove(elem: A): Boolean = ???
 
   /** Returns the count of nodes containing given entry. */
-  def countEntry(entry: A): Int = ???
+  def countEntry(entry: A): Int = {
+    var sum = 0
+    for (i <- dataArray.iterator){
+      if (i.value == entry){
+        sum += 1
+      }
+    }
+    sum
+  }
 
   /** Gets the element at the specified index. */
-  override def apply(idx: Int): A = ???
+  override def apply(idx: Int): A = {
+    dataArray(idx).value.get
+  }
 
   /** Replaces element at given index with a new value. */
-  override def update(idx: Int, elem: A): Unit = ???
+  override def update(idx: Int, elem: A): Unit = {
+    dataArray(idx).value = elem
+  }
 
   /** Returns an Iterator that can be used only once. */
   def iterator: Iterator[A] = new Iterator[A] {
