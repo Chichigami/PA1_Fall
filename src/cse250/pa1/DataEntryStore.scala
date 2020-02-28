@@ -25,7 +25,6 @@ class DataEntryStore[A >: Null <: AnyRef](private val capacity: Int = 100)
   private var headIndex = -1
   private var tailIndex = -1
   private var numStored = 0
-  var wrapped: Boolean = false
 
   /** Inserts element to tail of list. */
   def insert(elem: A): Unit = {
@@ -34,12 +33,14 @@ class DataEntryStore[A >: Null <: AnyRef](private val capacity: Int = 100)
       headIndex = 0
       tailIndex = 0
       dataArray(tailIndex).value = elem
-      println(tailIndex + ":" + elem)
     } else if (numStored == capacity) { //wrapping around
       previousNode = tailIndex
       tailIndex = headIndex
-      headIndex += 1
-      println(tailIndex + ":" + elem)
+      if (headIndex == capacity -1){
+        headIndex = 0
+      } else {
+        headIndex += 1
+      }
       dataArray(tailIndex).value = elem
       dataArray(tailIndex).prev = previousNode
       dataArray(tailIndex).next = -1
@@ -52,7 +53,6 @@ class DataEntryStore[A >: Null <: AnyRef](private val capacity: Int = 100)
       dataArray(tailIndex).value = elem
       dataArray(tailIndex).prev = previousNode
       dataArray(previousNode).next = tailIndex
-      println(tailIndex + ":" + elem)
     }
     numStored += 1
   }
@@ -60,22 +60,27 @@ class DataEntryStore[A >: Null <: AnyRef](private val capacity: Int = 100)
   /** Removes all copies of the given element. */
   def remove(elem: A): Boolean = {
     var doesElemExist = false
-    val iter = dataArray.iterator
-    for (i <- iter){
-      if (i.value == elem){
-        doesElemExist = true
-        if (i.prev != -1){
-          dataArray(i.prev).next = i.next
-        }
-        if (i.next != -1){
-          dataArray(i.next).prev = i.prev
-        }
+    val count = countEntry(elem)
+    for (times <- 0 to count){
+      val iter = dataArray.iterator
+      for (i <- iter){
+        if (i.value == elem){
+          doesElemExist = true
+          if (i.prev != -1){ //if previous exist
+            if (i.next != -1){ //and next exist
+              dataArray(i.prev).next = i.next //previous links with next
+              dataArray(i.next).prev = i.prev //next links with previous
+            } else {
+              dataArray(i.prev).next = -1 //previous = -1
+            }
+          }
 
-        //need to change tail
-        i.value = null //cleaning node
-        i.prev = -1
-        i.next = -1
-        numStored -= 1
+          //need to change tail
+          i.value = null //cleaning node
+          i.prev = -1
+          i.next = -1
+          numStored -= 1
+        }
       }
     }
     doesElemExist
@@ -86,7 +91,7 @@ class DataEntryStore[A >: Null <: AnyRef](private val capacity: Int = 100)
     var sum = 0
     for (i <- dataArray.iterator){
       if (i.value == entry){
-       sum += 1
+        sum += 1
       }
     }
     sum
